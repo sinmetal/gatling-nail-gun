@@ -32,6 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 	ProjectID = projectID
+	log.Printf("ProjectID is %s\n", projectID)
 
 	{
 		client, err := cloudtasks.NewClient(context.Background())
