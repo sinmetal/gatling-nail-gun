@@ -8,12 +8,14 @@ import (
 	"os"
 
 	"cloud.google.com/go/cloudtasks/apiv2beta3"
+	"cloud.google.com/go/spanner"
 	"github.com/sinmetal/gcpmetadata"
 )
 
 var ProjectID string
 var ServiceAccountEmail string
 var TasksClient *cloudtasks.Client
+var SpannerClient *spanner.Client
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	log.Print("Hello world received a request.")
@@ -60,5 +62,13 @@ func init() {
 			log.Fatalf("failed cloudtasks.NewClient.err=%+v", err)
 		}
 		TasksClient = client
+	}
+
+	{
+		db := os.Getenv("SPANNER_DATABASE")
+		SpannerClient, err = CreateSpannerClient(context.Background(), db)
+		if err != nil {
+			log.Fatalf("failed CreateSpannerClient. DB=%s, err=%+v", db, err)
+		}
 	}
 }
