@@ -27,11 +27,12 @@ func NewPlanQueueService(host string, tasks *cloudtasks.Client) (*PlanQueueServi
 	return &PlanQueueService{
 		tasks:     tasks,
 		queueName: qn,
-		targetURL: fmt.Sprintf("https://%s/setup/", host),
+		targetURL: fmt.Sprintf("https://%s/plan/", host),
 	}, nil
 }
 
 type PlanQueueTask struct {
+	SQL string `json:"sql"`
 }
 
 func (s *PlanQueueService) AddTask(ctx context.Context, body PlanQueueTask) error {
