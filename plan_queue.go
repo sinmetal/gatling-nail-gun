@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta3"
@@ -17,21 +18,16 @@ type PlanQueueService struct {
 	tasks     *cloudtasks.Client
 }
 
-func NewPlanQueueService(tasks *cloudtasks.Client) (*PlanQueueService, error) {
+func NewPlanQueueService(host string, tasks *cloudtasks.Client) (*PlanQueueService, error) {
 	qn := os.Getenv("PLAN_QUEUE_NAME")
 	if len(qn) < 1 {
 		return nil, errors.New("required PLAN_QUEUE_NAME variable")
 	}
 
-	url := os.Getenv("PLAN_QUEUE_TARGET_URL")
-	if len(url) < 1 {
-		return nil, errors.New("required PLAN_QUEUE_TARGET_URL variable")
-	}
-
 	return &PlanQueueService{
 		tasks:     tasks,
 		queueName: qn,
-		targetURL: url,
+		targetURL: fmt.Sprintf("https://%s/setup/", host),
 	}, nil
 }
 
@@ -53,7 +49,7 @@ func (s *PlanQueueService) AddTask(ctx context.Context, body PlanQueueTask) erro
 					Url:        s.targetURL,
 					AuthorizationHeader: &taskspb.HttpRequest_OidcToken{
 						OidcToken: &taskspb.OidcToken{
-							ServiceAccountEmail: ServiceAccountEmail(),
+							ServiceAccountEmail: ServiceAccountEmail,
 						},
 					},
 				},

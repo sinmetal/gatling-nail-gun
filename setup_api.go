@@ -27,7 +27,7 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("%s\n", string(b))
 
-	pqs, err := NewPlanQueueService(TasksClient)
+	pqs, err := NewPlanQueueService(r.Host, TasksClient)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("failed NewPlanQueueService.err=%+v", err)
