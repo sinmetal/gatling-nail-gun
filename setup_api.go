@@ -36,7 +36,7 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	prefix := GenerateUUIDPrefix()
-	for p := range prefix {
+	for _, p := range prefix {
 		sql := fmt.Sprintf(form.SQL, p)
 		log.Printf("SQL is %s\n", sql)
 		if err := pqs.AddTask(r.Context(), &PlanQueueTask{
