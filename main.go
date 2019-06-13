@@ -30,6 +30,7 @@ func main() {
 	log.Print("Hello world sample started.")
 
 	http.HandleFunc("/setup/", handleSetupAPI)
+	http.HandleFunc("/plan/", handlePlanAPI)
 	http.HandleFunc("/", handler)
 
 	port := os.Getenv("PORT")
