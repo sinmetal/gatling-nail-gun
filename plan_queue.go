@@ -35,7 +35,7 @@ type PlanQueueTask struct {
 	SQL string `json:"sql"`
 }
 
-func (s *PlanQueueService) AddTask(ctx context.Context, body PlanQueueTask) error {
+func (s *PlanQueueService) AddTask(ctx context.Context, body *PlanQueueTask) error {
 	message, err := json.Marshal(body)
 	if err != nil {
 		return failure.Wrap(err, failure.Messagef("failed json.Marshal. body=%+v\n", body))
@@ -48,6 +48,7 @@ func (s *PlanQueueService) AddTask(ctx context.Context, body PlanQueueTask) erro
 				HttpRequest: &taskspb.HttpRequest{
 					HttpMethod: taskspb.HttpMethod_POST,
 					Url:        s.targetURL,
+					Body:       []byte(message),
 					AuthorizationHeader: &taskspb.HttpRequest_OidcToken{
 						OidcToken: &taskspb.OidcToken{
 							ServiceAccountEmail: ServiceAccountEmail,
@@ -57,7 +58,6 @@ func (s *PlanQueueService) AddTask(ctx context.Context, body PlanQueueTask) erro
 			},
 		},
 	}
-	req.Task.GetHttpRequest().Body = []byte(message)
 
 	_, err = s.tasks.CreateTask(ctx, req)
 	if err != nil {

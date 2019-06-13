@@ -39,7 +39,7 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	for p := range prefix {
 		sql := fmt.Sprintf(form.SQL, p)
 		log.Printf("SQL is %s\n", sql)
-		if err := pqs.AddTask(r.Context(), PlanQueueTask{
+		if err := pqs.AddTask(r.Context(), &PlanQueueTask{
 			SQL: sql,
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
