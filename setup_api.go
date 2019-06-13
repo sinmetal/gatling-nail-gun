@@ -49,6 +49,10 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte("DONE"))
+	if err != nil {
+		log.Printf("failed response.write.err=%+v", err)
+	}
 }
 
 // GenerateUUIDPrefix is UUIDの先頭文字になりえる2桁の文字列一覧を返す
