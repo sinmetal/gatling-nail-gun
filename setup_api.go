@@ -37,10 +37,10 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 
 	prefix := GenerateUUIDPrefix()
 	for _, p := range prefix {
-		sql := fmt.Sprintf(form.SQL, p)
-		log.Printf("SQL is %s\n", sql)
+		log.Printf("SQL is %s, Param is %s\n", form.SQL, p)
 		if err := pqs.AddTask(r.Context(), &PlanQueueTask{
-			SQL: sql,
+			SQL:   form.SQL,
+			Param: p,
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("failed AddTask.err=%+v", err)

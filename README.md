@@ -1,6 +1,17 @@
 # gatling-nail-gun
 Spannerにおらおらおらおらおらおら更新クエリを投げまくってみるサンプル
 
+## Environment
+
+### Local
+
+```
+GCLOUD_PROJECT=
+PLAN_QUEUE_NAME=
+SPANNER_DATABASE=
+GCLOUD_SERVICE_ACCOUNT=hoge@hoge.com
+```
+
 ## Test
 
 ```
