@@ -25,14 +25,14 @@ type Tweet struct {
 	CommitedAt time.Time
 }
 
-func HandlePlanAPI(w http.ResponseWriter, r *http.Request) {
+func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	form := &PlanQueueTask{}
+	form := &FireQueueTask{}
 	if err := json.Unmarshal(b, form); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -103,21 +103,21 @@ func HandlePlanAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("Processing Count %d\n", count)
 
-	pqs, err := NewPlanQueueService(r.Host, TasksClient)
+	pqs, err := NewFireQueueService(r.Host, TasksClient)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("failed NewPlanQueueService. err=%+v", err)
+		log.Printf("failed NewFireQueueService. err=%+v", err)
 		return
 	}
 
 	fmt.Printf("Last Id is %s\n", lastID)
-	if err := pqs.AddTask(r.Context(), &PlanQueueTask{
+	if err := pqs.AddTask(r.Context(), &FireQueueTask{
 		SQL:    form.SQL,
 		Param:  form.Param,
 		LastID: lastID,
 	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("failed PlanQueueTask.AddTask. err=%+v", err)
+		log.Printf("failed FireQueueTask.AddTask. err=%+v", err)
 		return
 	}
 }

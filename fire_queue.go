@@ -12,32 +12,32 @@ import (
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
 )
 
-type PlanQueueService struct {
+type FireQueueService struct {
 	queueName string
 	targetURL string
 	tasks     *cloudtasks.Client
 }
 
-func NewPlanQueueService(host string, tasks *cloudtasks.Client) (*PlanQueueService, error) {
-	qn := os.Getenv("PLAN_QUEUE_NAME")
+func NewFireQueueService(host string, tasks *cloudtasks.Client) (*FireQueueService, error) {
+	qn := os.Getenv("FIRE_QUEUE_NAME")
 	if len(qn) < 1 {
-		return nil, errors.New("required PLAN_QUEUE_NAME variable")
+		return nil, errors.New("required FIRE_QUEUE_NAME variable")
 	}
 
-	return &PlanQueueService{
+	return &FireQueueService{
 		tasks:     tasks,
 		queueName: qn,
-		targetURL: fmt.Sprintf("https://%s/plan/", host),
+		targetURL: fmt.Sprintf("https://%s/fire/", host),
 	}, nil
 }
 
-type PlanQueueTask struct {
+type FireQueueTask struct {
 	SQL    string `json:"sql"`
 	Param  string `json:"param"`
 	LastID string `json:"lastID"`
 }
 
-func (s *PlanQueueService) AddTask(ctx context.Context, body *PlanQueueTask) error {
+func (s *FireQueueService) AddTask(ctx context.Context, body *FireQueueTask) error {
 	message, err := json.Marshal(body)
 	if err != nil {
 		return failure.Wrap(err, failure.Messagef("failed json.Marshal. body=%+v\n", body))

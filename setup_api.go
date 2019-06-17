@@ -28,17 +28,17 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("%s\n", string(b))
 
-	pqs, err := NewPlanQueueService(r.Host, TasksClient)
+	pqs, err := NewFireQueueService(r.Host, TasksClient)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("failed NewPlanQueueService.err=%+v", err)
+		log.Printf("failed NewFireQueueService.err=%+v", err)
 		return
 	}
 
 	prefix := GenerateUUIDPrefix()
 	for _, p := range prefix {
 		log.Printf("SQL is %s, Param is %s\n", form.SQL, p)
-		if err := pqs.AddTask(r.Context(), &PlanQueueTask{
+		if err := pqs.AddTask(r.Context(), &FireQueueTask{
 			SQL:    form.SQL,
 			Param:  p,
 			LastID: "",

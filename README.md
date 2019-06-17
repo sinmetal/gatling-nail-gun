@@ -7,9 +7,15 @@ Spannerにおらおらおらおらおらおら更新クエリを投げまくっ�
 
 ```
 GCLOUD_PROJECT=
-PLAN_QUEUE_NAME=
+FIRE_QUEUE_NAME=
 SPANNER_DATABASE=
 GCLOUD_SERVICE_ACCOUNT=hoge@hoge.com
+```
+
+## Deploy
+
+```
+gcloud beta run services update gatling-nail-gun --set-env-vars=FIRE_QUEUE_NAME=projects/{PROJECT_ID}/locations/asia-northeast1/queues/fire,SPANNER_DATABASE=projects/{PROJECT_ID}/instances/{INSTNCE}/databases/{DATABASE}
 ```
 
 ## Test
