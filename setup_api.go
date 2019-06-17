@@ -13,7 +13,7 @@ type SetupAPIRequest struct {
 	Digit int    `json:"digit"` // TODO UUIDの桁数を指定しようかと思っているが未実装
 }
 
-func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
+func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -36,12 +36,17 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	prefix := GenerateUUIDPrefix()
-	for _, p := range prefix {
-		log.Printf("SQL is %s, Param is %s\n", form.SQL, p)
+	for i, p := range prefix {
+		endID := "zz" // とりあえずでかいやつを入れてる
+		if i < len(prefix)-1 {
+			endID = prefix[i+1]
+		}
+		log.Printf("SQL is %s, Start:%s, End:%s\n", form.SQL, p, endID)
 		if err := pqs.AddTask(r.Context(), &FireQueueTask{
-			SQL:    form.SQL,
-			Param:  p,
-			LastID: "",
+			SQL:     form.SQL,
+			StartID: p,
+			EndID:   endID,
+			LastID:  "",
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("failed AddTask.err=%+v", err)

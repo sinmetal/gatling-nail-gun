@@ -3,21 +3,21 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestHandleFireAPI(t *testing.T) {
-	hf := http.HandlerFunc(HandleFireAPI)
+func TestHandleSetupAPI(t *testing.T) {
+	t.SkipNow()
+
+	hf := http.HandlerFunc(HandleSetupAPI)
 	server := httptest.NewServer(hf)
 	defer server.Close()
 
-	form := FireQueueTask{
-		SQL:     `SELECT Id FROM Tweet WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" AND Id < \"%v\" ORDER BY Id Limit 1000`,
-		StartID: "0",
-		EndID:   "zz",
-		LastID:  "",
+	form := SetupAPIRequest{
+		SQL: `SELECT Id FROM Tweet WHERE STARTS_WITH(Id, '%v') AND Id > '%v' AND Id < '%v' ORDER BY Id Limit 1000`,
 	}
 	b, err := json.Marshal(form)
 	if err != nil {
@@ -30,4 +30,8 @@ func TestHandleFireAPI(t *testing.T) {
 	if e, g := http.StatusOK, resp.StatusCode; e != g {
 		t.Errorf("StatusCode expected %v; got %v", e, g)
 	}
+}
+
+func TestGenerateUUIDPrefix(t *testing.T) {
+	fmt.Printf("UUID:%+v\n", GenerateUUIDPrefix())
 }

@@ -39,9 +39,9 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("%s\n", string(b))
+	log.Printf("BODY:%s\n", string(b))
 
-	sql := fmt.Sprintf(form.SQL, form.Param, form.LastID)
+	sql := fmt.Sprintf(form.SQL, form.StartID, form.LastID, form.EndID)
 	fmt.Printf("Execute SQL %s\n", sql)
 	iter := SpannerClient.Single().WithTimestampBound(spanner.ExactStaleness(time.Second*15)).QueryWithStats(r.Context(), spanner.Statement{
 		SQL: sql,
@@ -70,6 +70,7 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 		keySets = spanner.KeySets(keySets, spanner.Key{id})
 	}
 
+	var schemaVersion int64 = 2
 	var lastID string
 	var count int
 	_, err = SpannerClient.ReadWriteTransaction(r.Context(), func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
@@ -84,20 +85,21 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return err
 			}
+			count++
 			var tweet Tweet
 			if err := row.ToStruct(&tweet); err != nil {
 				return err
 			}
-			if tweet.SchemaVersion.Valid && tweet.SchemaVersion.Int64 >= 1 {
+			if tweet.SchemaVersion.Valid && tweet.SchemaVersion.Int64 >= schemaVersion {
 				fmt.Printf("%s goes through because SchemaVersion is %d\n", tweet.ID, tweet.SchemaVersion.Int64)
 				continue
 			}
 			tweet.Count++
 			tweet.UpdatedAt = time.Now()
 			cols := []string{"Id", "Count", "UpdatedAt", "CommitedAt", "SchemaVersion"}
-			ml = append(ml, spanner.Update("Tweet", cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp, 1}))
+			ml = append(ml, spanner.Update("Tweet", cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp, schemaVersion}))
 			lastID = tweet.ID
-			count++
+
 		}
 		return txn.BufferWrite(ml)
 	})
@@ -108,7 +110,7 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("Processing Count %d\n", count)
 
-	if count < 1 {
+	if count < 1000 {
 		w.WriteHeader(http.StatusOK)
 		fmt.Println("Finish!!")
 		return
@@ -122,9 +124,10 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Last Id is %s\n", lastID)
 	if err := pqs.AddTask(r.Context(), &FireQueueTask{
-		SQL:    form.SQL,
-		Param:  form.Param,
-		LastID: lastID,
+		SQL:     form.SQL,
+		StartID: form.StartID,
+		EndID:   form.EndID,
+		LastID:  lastID,
 	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("failed FireQueueTask.AddTask. err=%+v", err)
