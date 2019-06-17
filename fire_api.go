@@ -23,7 +23,7 @@ type Tweet struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	CommitedAt    time.Time
-	SchemaVersion int
+	SchemaVersion spanner.NullInt64
 }
 
 func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
@@ -88,8 +88,8 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 			if err := row.ToStruct(&tweet); err != nil {
 				return err
 			}
-			if tweet.SchemaVersion >= 1 {
-				fmt.Printf("%s goes through because SchemaVersion is %d\n", tweet.ID, tweet.SchemaVersion)
+			if tweet.SchemaVersion.Valid && tweet.SchemaVersion.Int64 >= 1 {
+				fmt.Printf("%s goes through because SchemaVersion is %d\n", tweet.ID, tweet.SchemaVersion.Int64)
 				continue
 			}
 			tweet.Count++
