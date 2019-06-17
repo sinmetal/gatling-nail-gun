@@ -14,15 +14,16 @@ import (
 )
 
 type Tweet struct {
-	ID         string `spanner:"Id"`
-	Author     string
-	Content    string
-	Count      int64
-	Favos      []string
-	Sort       int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	CommitedAt time.Time
+	ID            string `spanner:"Id"`
+	Author        string
+	Content       string
+	Count         int64
+	Favos         []string
+	Sort          int
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	CommitedAt    time.Time
+	SchemaVersion int
 }
 
 func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +74,7 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 	var count int
 	_, err = SpannerClient.ReadWriteTransaction(r.Context(), func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		var ml []*spanner.Mutation
-		iter := txn.Read(ctx, "Tweet", keySets, []string{"Id", "Count", "CommitedAt", "UpdatedAt"})
+		iter := txn.Read(ctx, "Tweet", keySets, []string{"Id", "Count", "CommitedAt", "UpdatedAt", "SchemaVersion"})
 		defer iter.Stop()
 		for {
 			row, err := iter.Next()
@@ -86,6 +87,10 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 			var tweet Tweet
 			if err := row.ToStruct(&tweet); err != nil {
 				return err
+			}
+			if tweet.SchemaVersion >= 1 {
+				fmt.Printf("%s goes through because SchemaVersion is %d\n", tweet.ID, tweet.SchemaVersion)
+				continue
 			}
 			tweet.Count++
 			tweet.UpdatedAt = time.Now()
@@ -103,6 +108,11 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("Processing Count %d\n", count)
 
+	if count < 1 {
+		w.WriteHeader(http.StatusOK)
+		fmt.Println("Finish!!")
+		return
+	}
 	pqs, err := NewFireQueueService(r.Host, TasksClient)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
