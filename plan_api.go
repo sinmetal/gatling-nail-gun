@@ -85,6 +85,8 @@ func HandlePlanAPI(w http.ResponseWriter, r *http.Request) {
 			if err := row.ToStruct(&tweet); err != nil {
 				return err
 			}
+			tweet.Count++
+			tweet.UpdatedAt = time.Now()
 			cols := []string{"Id", "Count", "UpdatedAt", "CommitedAt"}
 			ml = append(ml, spanner.Update("Tweet", cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp}))
 			lastID = tweet.ID
