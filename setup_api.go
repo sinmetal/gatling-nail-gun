@@ -69,14 +69,10 @@ func GenerateUUIDPrefix() []string {
 	}
 
 	var results []string
-	// TODO 2段だと多いので、とりあえず1段に...
-	//for _, i := range runeList {
-	//	for _, j := range runeList {
-	//		results = append(results, fmt.Sprintf("%s%s", i, j))
-	//	}
-	//}
 	for _, i := range runeList {
-		results = append(results, fmt.Sprintf("%s", i))
+		for _, j := range runeList {
+			results = append(results, fmt.Sprintf("%s%s", i, j))
+		}
 	}
 
 	return results
