@@ -17,5 +17,5 @@ GCLOUD_SERVICE_ACCOUNT=hoge@hoge.com
 ```
 curl https://{YOUR RUN URL}/setup/ -X POST \
   -H "Content-Type: application/json\nAuthorization: Bearer $(gcloud config config-helper --format 'value(credential.id_token)')" \
-  -d '{"sql": "SELECT Id FROM Tweet WHERE STARTS_WITH(Id, '%v')"}'
+  -d '{"sql": "SELECT Id FROM Tweet WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" ORDER BY Id Limit 1000"}'
 ```
