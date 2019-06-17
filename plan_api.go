@@ -40,8 +40,10 @@ func HandlePlanAPI(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("%s\n", string(b))
 
+	sql := fmt.Sprintf(form.SQL, form.Param, form.LastID)
+	fmt.Printf("Execute SQL %s\n", sql)
 	iter := SpannerClient.Single().WithTimestampBound(spanner.ExactStaleness(time.Second*15)).QueryWithStats(r.Context(), spanner.Statement{
-		SQL: fmt.Sprintf(form.SQL, form.Param),
+		SQL: sql,
 	})
 	defer iter.Stop()
 
@@ -108,10 +110,11 @@ func HandlePlanAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Next Id is %s\n", lastID)
+	fmt.Printf("Last Id is %s\n", lastID)
 	if err := pqs.AddTask(r.Context(), &PlanQueueTask{
-		SQL:   form.SQL,
-		Param: lastID,
+		SQL:    form.SQL,
+		Param:  form.Param,
+		LastID: lastID,
 	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("failed PlanQueueTask.AddTask. err=%+v", err)

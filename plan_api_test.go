@@ -14,8 +14,9 @@ func TestHandlePlanAPI(t *testing.T) {
 	defer server.Close()
 
 	form := PlanQueueTask{
-		SQL:   `SELECT Id FROM Tweet WHERE STARTS_WITH(Id, '%v') ORDER BY Id Limit 1000`,
-		Param: "0",
+		SQL:    `SELECT Id FROM Tweet WHERE STARTS_WITH(Id, '%v') AND Id > '%v' ORDER BY Id Limit 1000`,
+		Param:  "0",
+		LastID: "00002fd0-1152-49c4-9275-4e9bb7d0c0d0c6e70da0-904d-4858-ae61-5d847cc78894",
 	}
 	b, err := json.Marshal(form)
 	if err != nil {

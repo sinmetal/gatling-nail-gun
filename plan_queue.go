@@ -32,8 +32,9 @@ func NewPlanQueueService(host string, tasks *cloudtasks.Client) (*PlanQueueServi
 }
 
 type PlanQueueTask struct {
-	SQL   string `json:"sql"`
-	Param string `json:"param"`
+	SQL    string `json:"sql"`
+	Param  string `json:"param"`
+	LastID string `json:"lastID"`
 }
 
 func (s *PlanQueueService) AddTask(ctx context.Context, body *PlanQueueTask) error {
