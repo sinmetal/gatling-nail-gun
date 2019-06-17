@@ -39,8 +39,9 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	for _, p := range prefix {
 		log.Printf("SQL is %s, Param is %s\n", form.SQL, p)
 		if err := pqs.AddTask(r.Context(), &PlanQueueTask{
-			SQL:   form.SQL,
-			Param: p,
+			SQL:    form.SQL,
+			Param:  p,
+			LastID: "",
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("failed AddTask.err=%+v", err)
