@@ -89,8 +89,8 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 			}
 			tweet.Count++
 			tweet.UpdatedAt = time.Now()
-			cols := []string{"Id", "Count", "UpdatedAt", "CommitedAt"}
-			ml = append(ml, spanner.Update("Tweet", cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp}))
+			cols := []string{"Id", "Count", "UpdatedAt", "CommitedAt", "SchemaVersion"}
+			ml = append(ml, spanner.Update("Tweet", cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp, 1}))
 			lastID = tweet.ID
 			count++
 		}
