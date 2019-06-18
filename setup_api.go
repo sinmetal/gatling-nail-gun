@@ -41,7 +41,7 @@ func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	for _, p := range prefix {
 		log.Printf("SQL is %s, Start:%s\n", form.SQL, p)
 		if err := pqs.AddTask(r.Context(), &FireQueueTask{
-			SQL:           fmt.Sprintf(form.SQL, TweetTableName),
+			SQL:           form.SQL,
 			SchemaVersion: form.SchemaVersion,
 			Limit:         form.Limit,
 			StartID:       p,
