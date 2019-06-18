@@ -51,7 +51,7 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed spanner Update Operation .err=%+v", err)
 		return
 	}
-	fmt.Printf("Processing Count %d\n", count)
+	fmt.Printf("StartID:%s, Processing Count:%d\n", form.StartID, count)
 
 	if lastID == "" {
 		w.WriteHeader(http.StatusOK)

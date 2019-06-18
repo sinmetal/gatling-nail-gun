@@ -50,7 +50,7 @@ func TestMigration(t *testing.T) {
 
 	form := &FireQueueTask{
 		SQL:           `SELECT Id FROM TweetTest WHERE Id >= "%v" ORDER BY Id Limit %v`,
-		SchemaVersion: 2,
+		SchemaVersion: 1,
 		StartID:       "00",
 		LastID:        "",
 		Limit:         10,
@@ -129,11 +129,12 @@ func createTestData(ctx context.Context) error {
 
 	for i := 0; i < 11; i++ {
 		m, err := spanner.InsertOrUpdateStruct("TweetTest", &Tweet{
-			ID:         fmt.Sprintf("00%d", i),
-			Favos:      []string{},
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-			CommitedAt: spanner.CommitTimestamp,
+			ID:            fmt.Sprintf("00%d", i),
+			Favos:         []string{},
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+			CommitedAt:    spanner.CommitTimestamp,
+			SchemaVersion: spanner.NullInt64{Int64: 0},
 		})
 		if err != nil {
 			return err
@@ -142,11 +143,12 @@ func createTestData(ctx context.Context) error {
 	}
 	for i := 0; i < 11; i++ {
 		m, err := spanner.InsertOrUpdateStruct("TweetTest", &Tweet{
-			ID:         fmt.Sprintf("01%d", i),
-			Favos:      []string{},
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-			CommitedAt: spanner.CommitTimestamp,
+			ID:            fmt.Sprintf("01%d", i),
+			Favos:         []string{},
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+			CommitedAt:    spanner.CommitTimestamp,
+			SchemaVersion: spanner.NullInt64{Int64: 0},
 		})
 		if err != nil {
 			return err
