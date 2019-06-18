@@ -21,9 +21,10 @@ func TestHandleFireAPI(t *testing.T) {
 	defer server.Close()
 
 	form := FireQueueTask{
-		SQL:     `SELECT Id FROM TweetTest WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" AND Id < \"%v\" ORDER BY Id Limit 1000`,
-		StartID: "0",
-		LastID:  "",
+		SQL:           `SELECT Id FROM TweetTest WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" AND Id < \"%v\" ORDER BY Id Limit 1000`,
+		SchemaVersion: 2,
+		StartID:       "0",
+		LastID:        "",
 	}
 	b, err := json.Marshal(form)
 	if err != nil {
@@ -48,10 +49,11 @@ func TestMigration(t *testing.T) {
 	}
 
 	form := &FireQueueTask{
-		SQL:     `SELECT Id FROM TweetTest WHERE Id >= "%v" ORDER BY Id Limit %v`,
-		StartID: "00",
-		LastID:  "",
-		Limit:   10,
+		SQL:           `SELECT Id FROM TweetTest WHERE Id >= "%v" ORDER BY Id Limit %v`,
+		SchemaVersion: 2,
+		StartID:       "00",
+		LastID:        "",
+		Limit:         10,
 	}
 
 	{

@@ -9,8 +9,10 @@ import (
 )
 
 type SetupAPIRequest struct {
-	SQL   string `json:"sql"`
-	Digit int    `json:"digit"` // TODO UUIDの桁数を指定しようかと思っているが未実装
+	SQL           string `json:"sql"`
+	SchemaVersion int64  `json:"schemaVersion"`
+	Limit         int    `json:"limit"`
+	Digit         int    `json:"digit"` // TODO UUIDの桁数を指定しようかと思っているが未実装
 }
 
 func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
@@ -39,9 +41,11 @@ func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	for _, p := range prefix {
 		log.Printf("SQL is %s, Start:%s\n", form.SQL, p)
 		if err := pqs.AddTask(r.Context(), &FireQueueTask{
-			SQL:     form.SQL,
-			StartID: p,
-			LastID:  "",
+			SQL:           form.SQL,
+			SchemaVersion: form.SchemaVersion,
+			Limit:         form.Limit,
+			StartID:       p,
+			LastID:        "",
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("failed AddTask.err=%+v", err)

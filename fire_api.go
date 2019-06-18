@@ -108,7 +108,6 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 		keySets = spanner.KeySets(keySets, spanner.Key{id})
 	}
 
-	var schemaVersion int64 = 2
 	_, err = SpannerClient.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		var ml []*spanner.Mutation
 		iter := txn.Read(ctx, TweetTableName, keySets, []string{"Id", "Count", "CommitedAt", "UpdatedAt", "SchemaVersion"})
@@ -134,14 +133,14 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 				break
 			}
 			count++
-			if tweet.SchemaVersion.Valid && tweet.SchemaVersion.Int64 >= schemaVersion {
+			if tweet.SchemaVersion.Valid && tweet.SchemaVersion.Int64 >= form.SchemaVersion {
 				fmt.Printf("%s goes through because SchemaVersion is %d\n", tweet.ID, tweet.SchemaVersion.Int64)
 				continue
 			}
 			tweet.Count++
 			tweet.UpdatedAt = time.Now()
 			cols := []string{"Id", "Count", "UpdatedAt", "CommitedAt", "SchemaVersion"}
-			ml = append(ml, spanner.Update(TweetTableName, cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp, schemaVersion}))
+			ml = append(ml, spanner.Update(TweetTableName, cols, []interface{}{tweet.ID, tweet.Count, tweet.UpdatedAt, spanner.CommitTimestamp, form.SchemaVersion}))
 		}
 		if len(ml) < 1 {
 			return nil
