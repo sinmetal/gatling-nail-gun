@@ -104,11 +104,18 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 		if err := row.ColumnByName("Id", &id); err != nil {
 			return count, lastID, err
 		}
+		if strings.HasPrefix(id, form.StartID) == false {
+			fmt.Printf("%s has not prefix. prefix = %s\n", id, form.StartID)
+			break
+		}
 
 		keySets = spanner.KeySets(keySets, spanner.Key{id})
 		selectCount++
 	}
 	fmt.Printf("Select Count is %d\n", selectCount)
+	if selectCount < 1 {
+		return 0, lastID, nil
+	}
 
 	_, err = SpannerClient.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		var ml []*spanner.Mutation
@@ -126,10 +133,6 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 			var tweet Tweet
 			if err := row.ToStruct(&tweet); err != nil {
 				return err
-			}
-			if strings.HasPrefix(tweet.ID, form.StartID) == false {
-				fmt.Printf("%s has not prefix. prefix = %s\n", tweet.ID, form.StartID)
-				break
 			}
 			if count >= form.Limit {
 				lastID = tweet.ID
