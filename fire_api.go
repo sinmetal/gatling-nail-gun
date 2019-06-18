@@ -91,7 +91,7 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 	defer iter.Stop()
 
 	keySets := spanner.KeySets()
-
+	var selectCount int
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
@@ -106,7 +106,9 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 		}
 
 		keySets = spanner.KeySets(keySets, spanner.Key{id})
+		selectCount++
 	}
+	fmt.Printf("Select Count is %d\n", selectCount)
 
 	_, err = SpannerClient.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		var ml []*spanner.Mutation
@@ -126,6 +128,7 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 				return err
 			}
 			if strings.HasPrefix(tweet.ID, form.StartID) == false {
+				fmt.Printf("%s has not prefix. prefix = %s\n", tweet.ID, form.StartID)
 				break
 			}
 			if count >= form.Limit {
