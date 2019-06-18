@@ -34,8 +34,8 @@ func NewFireQueueService(host string, tasks *cloudtasks.Client) (*FireQueueServi
 type FireQueueTask struct {
 	SQL     string `json:"sql"`
 	StartID string `json:"startID"`
-	EndID   string `json:"endID"`
 	LastID  string `json:"lastID"`
+	Limit   int    `json:"limit"`
 }
 
 func (s *FireQueueService) AddTask(ctx context.Context, body *FireQueueTask) error {

@@ -45,7 +45,6 @@ func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
 		if err := pqs.AddTask(r.Context(), &FireQueueTask{
 			SQL:     form.SQL,
 			StartID: p,
-			EndID:   endID,
 			LastID:  "",
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
