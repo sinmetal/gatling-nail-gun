@@ -40,6 +40,16 @@ type FireQueueTask struct {
 }
 
 func (s *FireQueueService) AddTask(ctx context.Context, body *FireQueueTask) error {
+	if body.StartID == "" {
+		return errors.New("required StartID")
+	}
+	if body.SQL == "" {
+		return errors.New("required SQL")
+	}
+	if body.Limit < 1 {
+		return errors.New("required Limit")
+	}
+
 	message, err := json.Marshal(body)
 	if err != nil {
 		return failure.Wrap(err, failure.Messagef("failed json.Marshal. body=%+v\n", body))

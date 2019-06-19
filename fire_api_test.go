@@ -21,10 +21,11 @@ func TestHandleFireAPI(t *testing.T) {
 	defer server.Close()
 
 	form := FireQueueTask{
-		SQL:           `SELECT Id FROM TweetTest WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" AND Id < \"%v\" ORDER BY Id Limit 1000`,
+		SQL:           `SELECT Id FROM TweetTest WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" AND Id < \"%v\" ORDER BY Id Limit %v`,
 		SchemaVersion: 2,
 		StartID:       "0",
 		LastID:        "",
+		Limit:         10,
 	}
 	b, err := json.Marshal(form)
 	if err != nil {
