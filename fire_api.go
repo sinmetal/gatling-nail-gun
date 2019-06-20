@@ -42,8 +42,28 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	log.Printf("FIRE API BODY:%s\n", string(b))
 
-	log.Printf("BODY:%s\n", string(b))
+	if form.SQL == "" {
+		log.Printf("required SQL\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.SchemaVersion == 0 {
+		log.Printf("required SchemaVersion")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.Limit == 0 {
+		log.Printf("required Limit")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.StartID == "" {
+		log.Printf("required StartID")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	count, lastID, err := Migration(r.Context(), form)
 	if err != nil {
@@ -141,7 +161,7 @@ func Migration(ctx context.Context, form *FireQueueTask) (count int, lastID stri
 			}
 			count++
 			if tweet.SchemaVersion.Valid && tweet.SchemaVersion.Int64 >= form.SchemaVersion {
-				fmt.Printf("%s goes through because SchemaVersion is %d\n", tweet.ID, tweet.SchemaVersion.Int64)
+				fmt.Printf("%s goes through because SchemaVersion is data=%d, form=%d\n", tweet.ID, tweet.SchemaVersion.Int64, form.SchemaVersion)
 				continue
 			}
 			tweet.Count++

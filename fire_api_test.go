@@ -14,14 +14,12 @@ import (
 )
 
 func TestHandleFireAPI(t *testing.T) {
-	t.SkipNow()
-
 	hf := http.HandlerFunc(HandleFireAPI)
 	server := httptest.NewServer(hf)
 	defer server.Close()
 
 	form := FireQueueTask{
-		SQL:           `SELECT Id FROM TweetTest WHERE STARTS_WITH(Id, \"%v\") AND Id > \"%v\" AND Id < \"%v\" ORDER BY Id Limit %v`,
+		SQL:           `SELECT Id FROM TweetTest WHERE Id >= "%v" ORDER BY Id Limit %v`,
 		SchemaVersion: 2,
 		StartID:       "0",
 		LastID:        "",

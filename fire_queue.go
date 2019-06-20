@@ -49,6 +49,9 @@ func (s *FireQueueService) AddTask(ctx context.Context, body *FireQueueTask) err
 	if body.Limit < 1 {
 		return errors.New("required Limit")
 	}
+	if body.SchemaVersion == 0 {
+		return errors.New("required SchemaVersion")
+	}
 
 	message, err := json.Marshal(body)
 	if err != nil {

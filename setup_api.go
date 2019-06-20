@@ -27,8 +27,23 @@ func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	log.Printf("SETUP API BODY:%s\n", string(b))
 
-	log.Printf("%s\n", string(b))
+	if form.SQL == "" {
+		log.Printf("required SQL\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.SchemaVersion == 0 {
+		log.Printf("required SchemaVersion")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.Limit == 0 {
+		log.Printf("required Limit")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	pqs, err := NewFireQueueService(r.Host, TasksClient)
 	if err != nil {

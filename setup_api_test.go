@@ -17,7 +17,9 @@ func TestHandleSetupAPI(t *testing.T) {
 	defer server.Close()
 
 	form := SetupAPIRequest{
-		SQL: `SELECT Id FROM Tweet WHERE STARTS_WITH(Id, '%v') AND Id > '%v' AND Id < '%v' ORDER BY Id Limit 1000`,
+		SQL:           `SELECT Id FROM Tweet WHERE STARTS_WITH(Id, '%v') AND Id > '%v' AND Id < '%v' ORDER BY Id Limit 1000`,
+		Limit:         10,
+		SchemaVersion: 2,
 	}
 	b, err := json.Marshal(form)
 	if err != nil {
