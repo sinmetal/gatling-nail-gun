@@ -88,10 +88,11 @@ func HandleFireAPI(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Last Id is %s\n", lastID)
 	if err := pqs.AddTask(r.Context(), &FireQueueTask{
-		SQL:     form.SQL,
-		Limit:   form.Limit,
-		StartID: form.StartID,
-		LastID:  lastID,
+		SQL:           form.SQL,
+		Limit:         form.Limit,
+		StartID:       form.StartID,
+		LastID:        lastID,
+		SchemaVersion: form.SchemaVersion,
 	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("failed FireQueueTask.AddTask. err=%+v", err)
