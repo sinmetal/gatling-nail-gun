@@ -9,11 +9,13 @@ import (
 )
 
 type SetupAPIRequest struct {
-	SQL   string `json:"sql"`
-	Digit int    `json:"digit"` // TODO UUIDの桁数を指定しようかと思っているが未実装
+	SQL           string `json:"sql"`
+	SchemaVersion int64  `json:"schemaVersion"`
+	Limit         int    `json:"limit"`
+	Digit         int    `json:"digit"` // TODO UUIDの桁数を指定しようかと思っているが未実装
 }
 
-func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
+func HandleSetupAPI(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -25,22 +27,40 @@ func handleSetupAPI(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	log.Printf("SETUP API BODY:%s\n", string(b))
 
-	log.Printf("%s\n", string(b))
+	if form.SQL == "" {
+		log.Printf("required SQL\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.SchemaVersion == 0 {
+		log.Printf("required SchemaVersion")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if form.Limit == 0 {
+		log.Printf("required Limit")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	pqs, err := NewPlanQueueService(r.Host, TasksClient)
+	pqs, err := NewFireQueueService(r.Host, TasksClient)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("failed NewPlanQueueService.err=%+v", err)
+		log.Printf("failed NewFireQueueService.err=%+v", err)
 		return
 	}
 
 	prefix := GenerateUUIDPrefix()
-	for p := range prefix {
-		sql := fmt.Sprintf(form.SQL, p)
-		log.Printf("SQL is %s\n", sql)
-		if err := pqs.AddTask(r.Context(), &PlanQueueTask{
-			SQL: sql,
+	for _, p := range prefix {
+		log.Printf("SQL is %s, Start:%s\n", form.SQL, p)
+		if err := pqs.AddTask(r.Context(), &FireQueueTask{
+			SQL:           form.SQL,
+			SchemaVersion: form.SchemaVersion,
+			Limit:         form.Limit,
+			StartID:       p,
+			LastID:        "",
 		}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("failed AddTask.err=%+v", err)
@@ -70,7 +90,7 @@ func GenerateUUIDPrefix() []string {
 	var results []string
 	for _, i := range runeList {
 		for _, j := range runeList {
-			results = append(results, fmt.Sprintf("%s%s%s", i, j))
+			results = append(results, fmt.Sprintf("%s%s", i, j))
 		}
 	}
 
